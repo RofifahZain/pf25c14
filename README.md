@@ -1,6 +1,6 @@
 #ES234211 - Programming Fundamental Mini Project  
-class C, Group 14
+class C, Group 4
 #Type Members:
-1. 5026241012, Maria Elvina
-2. 5026241092, Fachriza Rizky Susanto
-3. 5026241175, Aurelyo Nouvabryano Akhmad
+2. 5026241131, Rofifah Zain Nur Alfiyah
+3. 5026241156, Franzaldi Amarullah Nalandhika
+1. 5026241167, Adhima Anfasa Bilqi
