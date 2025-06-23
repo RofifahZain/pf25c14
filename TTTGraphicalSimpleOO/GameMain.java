@@ -13,9 +13,9 @@ public class GameMain extends JPanel {
     // Define named constants for the drawing graphics
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.WHITE;
-    public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
-    public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
+    public static final Color COLOR_BG_STATUS = new Color(255, 234, 234);
+    public static final Color COLOR_CROSS = new Color(250, 148, 163);  // Red #FA94A3FF
+    public static final Color COLOR_NOUGHT = new Color(147, 229, 255); // Blue #409AE1
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
     // Define game objects
@@ -102,13 +102,13 @@ public class GameMain extends JPanel {
             statusBar.setForeground(Color.BLACK);
             statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
         } else if (currentState == State.DRAW) {
-            statusBar.setForeground(Color.RED);
+            statusBar.setForeground(new Color(110, 109, 109));
             statusBar.setText("It's a Draw! Click to play again.");
         } else if (currentState == State.CROSS_WON) {
-            statusBar.setForeground(Color.RED);
+            statusBar.setForeground(new Color(244, 75, 101));
             statusBar.setText("'X' Won! Click to play again.");
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setForeground(Color.RED);
+            statusBar.setForeground(new Color(100, 131, 250));
             statusBar.setText("'O' Won! Click to play again.");
         }
     }
