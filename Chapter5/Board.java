@@ -1,10 +1,6 @@
 package Chapter5;
 
 
-import Chapter5.Cell;
-import Chapter5.Seed;
-import Chapter5.State;
-
 import java.awt.*;
 /**
  * The Board class models the ROWS-by-COLS game board.

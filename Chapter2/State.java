@@ -1,4 +1,4 @@
-package TTTConsoleOO;
+package Chapter2;
 
 public enum State {
     PLAYING,

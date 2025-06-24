@@ -1,4 +1,4 @@
-package TTTConsoleOO;
+package Chapter2;
 
 /**
  * The Board class models the TTT game-board of 3x3 cells.

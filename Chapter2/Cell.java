@@ -1,4 +1,4 @@
-package TTTConsoleOO;
+package Chapter2;
 
 /**
  * The Cell class models each individual cell of the TTT 3x3 grid.

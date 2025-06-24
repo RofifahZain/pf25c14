@@ -1,10 +1,5 @@
 package Chapter5;
 
-import Chapter5.Board;
-import Chapter5.Cell;
-import Chapter5.Seed;
-import Chapter5.State;
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -81,7 +76,7 @@ public class GameMain extends JPanel {
 
         super.setLayout(new BorderLayout());
         super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
-        super.setPreferredSize(new Dimension(TTTGraphicalSimpleOO.Board.CANVAS_WIDTH, Chapter5.Board.CANVAS_HEIGHT + 30));
+        super.setPreferredSize(new Dimension(Chapter4.Board.CANVAS_WIDTH, Chapter5.Board.CANVAS_HEIGHT + 30));
         // account for statusBar in height
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
@@ -102,7 +97,7 @@ public class GameMain extends JPanel {
                 board.cells[row][col].content = Chapter5.Seed.NO_SEED; // all cells empty
             }
         }
-        currentPlayer =Chapter5.Seed.CROSS;    // cross plays first
+        currentPlayer = Chapter5.Seed.CROSS;    // cross plays first
         currentState = Chapter5.State.PLAYING;  // ready to play
     }
 

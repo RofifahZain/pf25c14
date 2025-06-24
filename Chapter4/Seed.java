@@ -1,4 +1,4 @@
-package TTTGraphicalSimpleOO;
+package Chapter4;
 
 /**
  * This enum is used by:
