@@ -1,3 +1,5 @@
+package Chapter5;
+
 import java.awt.Image;
 import java.net.URL;
 import javax.swing.ImageIcon;
