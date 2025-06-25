@@ -25,6 +25,18 @@ public class GameMain extends JPanel {
     private Chapter5.State currentState;  // the current state of the game
     private Chapter5.Seed currentPlayer;  // the current player
     private JLabel statusBar;    // for displaying status message
+    private int wins = 0;
+    private int losses = 0;
+    private int draws = 0;
+    private String loggedInUser = "";
+    private boolean gameEnded = false;
+    private boolean userIsX = true;
+
+    //timer
+    private Timer turnTimer;
+    private static final int TURN_TIME_LIMIT = 30; // dalam detik
+    private int timeRemaining;
+    private JLabel timerLabel; // label waktu
 
     /** Constructor to setup the UI and game components */
     public GameMain() {
@@ -46,6 +58,7 @@ public class GameMain extends JPanel {
                         currentState = board.stepGame(currentPlayer, row, col);
                         // Switch player
                         currentPlayer = (currentPlayer == Chapter5.Seed.CROSS) ? Chapter5.Seed.NOUGHT : Chapter5.Seed.CROSS;
+                        startTurnTimer(); // RESET TIMER saat pemain berpindah
                     }
                 } else {        // game over
                     newGame();  // restart the game
@@ -70,16 +83,29 @@ public class GameMain extends JPanel {
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
         statusBar.setOpaque(true);
-        statusBar.setPreferredSize(new Dimension(300, 30));
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
+        statusBar.setText("Game is starting...");
 
+        timerLabel = new JLabel("Time: 30");
+        timerLabel.setFont(FONT_STATUS);
+        timerLabel.setBackground(COLOR_BG_STATUS);
+        timerLabel.setOpaque(true);
+        timerLabel.setHorizontalAlignment(JLabel.RIGHT);
+        timerLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
+
+// Panel bawah untuk status dan timer
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(COLOR_BG_STATUS);
+        bottomPanel.setPreferredSize(new Dimension(300, 30));
+        bottomPanel.add(statusBar, BorderLayout.WEST);
+        bottomPanel.add(timerLabel, BorderLayout.EAST);
+
+// Atur layout panel utama
         super.setLayout(new BorderLayout());
-        super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
-        super.setPreferredSize(new Dimension(Chapter4.Board.CANVAS_WIDTH, Chapter5.Board.CANVAS_HEIGHT + 30));
-        // account for statusBar in height
+        super.add(bottomPanel, BorderLayout.PAGE_END); // bagian bawah
+        super.setPreferredSize(new Dimension(Chapter5.Board.CANVAS_WIDTH, Chapter5.Board.CANVAS_HEIGHT + 30));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
-
         // Set up Game
         initGame();
         newGame();
@@ -99,58 +125,208 @@ public class GameMain extends JPanel {
         }
         currentPlayer = Chapter5.Seed.CROSS;    // cross plays first
         currentState = Chapter5.State.PLAYING;  // ready to play
+        gameEnded = false;
+        startTurnTimer(); // MULAI TIMER
+        repaint();
     }
 
     /** Custom painting codes on this JPanel */
     @Override
-    public void paintComponent(Graphics g) {  // Callback via repaint()
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        setBackground(COLOR_BG); // set its background color
+        setBackground(COLOR_BG);
+        board.paint(g);
 
-        board.paint(g);  // ask the game board to paint itself
 
-        // Print status-bar message
         if (currentState == Chapter5.State.PLAYING) {
             statusBar.setForeground(Color.BLACK);
-            statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
-        } else if (currentState == Chapter5.State.DRAW) {
-            statusBar.setForeground(new Color(110, 109, 109));
-            statusBar.setText("It's a Draw! Click to play again.");
-        } else if (currentState == Chapter5.State.CROSS_WON) {
-            statusBar.setForeground(new Color(244, 75, 101));
-            statusBar.setText("'X' Won! Click to play again.");
-        } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setForeground(new Color(100, 131, 250));
-            statusBar.setText("'O' Won! Click to play again.");
+            statusBar.setText((currentPlayer == Seed.CROSS) ? loggedInUser + "'s Turn" : "O's Turn");
+
+        } else {
+            if (!gameEnded) {
+                // Tunda untuk memastikan gambar sudah tergambar
+                gameEnded = true;
+                Timer timer = new Timer(200, e -> checkAndHandleGameEnd());
+                timer.setRepeats(false);
+                timer.start();
+            }
+
+            if (currentState == Chapter5.State.DRAW) {
+                statusBar.setForeground(new Color(110, 109, 109));
+                statusBar.setText("It's a Draw!");
+            } else if (currentState == Chapter5.State.CROSS_WON) {
+                statusBar.setForeground(new Color(244, 75, 101));
+                statusBar.setText(loggedInUser + " Won!");
+            } else if (currentState == Chapter5.State.NOUGHT_WON) {
+                statusBar.setForeground(new Color(100, 131, 250));
+                statusBar.setText("O Won!");
+            }
         }
     }
+
+    private void startTurnTimer() {
+        if (turnTimer != null && turnTimer.isRunning()) {
+            turnTimer.stop();
+        }
+
+        timeRemaining = TURN_TIME_LIMIT;
+        timerLabel.setText("Time: " + timeRemaining + "s");
+
+        turnTimer = new Timer(1000, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                timeRemaining--;
+                timerLabel.setText("Time: " + timeRemaining + "s");
+
+                if (timeRemaining <= 0) {
+                    turnTimer.stop();
+                    // Lewatkan giliran
+                    currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+                    repaint();
+                    startTurnTimer(); // mulai ulang timer untuk lawan
+                }
+            }
+        });
+        turnTimer.start();
+    }
+
+    private void stopTurnTimer() {
+        if (turnTimer != null && turnTimer.isRunning()) {
+            turnTimer.stop();
+        }
+    }
+
+    private void checkAndHandleGameEnd() {
+        stopTurnTimer(); // ⛔ STOP TIMER LANGSUNG SAAT GAME END
+        String message;
+        String title = "Game Over";
+
+        if (currentState == Chapter5.State.DRAW) {
+            draws++;
+            updateStats("draw", draws);
+            message = "It's a Draw!";
+        } else if (currentState == Chapter5.State.CROSS_WON) {
+            wins++;
+            updateStats("win", wins);
+            message = loggedInUser + " Won!";
+        } else {
+            losses++;
+            updateStats("loss", losses);
+            message = "O Won!";
+        }
+
+        // Tampilkan 2 pilihan: Quit dan Play Again
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                message + "\nWhat would you like to do?",
+                title,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new Object[]{"Quit", "Play Again"},
+                "Play Again"
+        );
+
+        if (choice == JOptionPane.YES_OPTION) {
+            System.exit(0);  // keluar dari program
+        } else if (choice == JOptionPane.NO_OPTION) {
+            newGame();       // mulai ulang game
+            JOptionPane.showMessageDialog(this,
+                    "Updated Stats:\n" +
+                            "Wins: " + wins + "\n" +
+                            "Losses: " + losses + "\n" +
+                            "Draws: " + draws,
+                    "Leaderboard Info",
+                    JOptionPane.INFORMATION_MESSAGE);
+            repaint();       // perbarui tampilan
+        }
+    }
+
+    private void updateStats(String column, int value) {
+        String host = "mysql-2631b478-rofifahzain131-ttt.b.aivencloud.com";
+        String port = "22587";
+        String databaseName = "tictactoedb";
+        String dbUser = "avnadmin";
+        String dbPass = "AVNS_rAEVPQSOwl0Oo7KS89g";
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", dbUser, dbPass);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("UPDATE game_user SET " + column + " = " + value + " WHERE user_name = '" + loggedInUser + "'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void loadUserStats(String userName) throws ClassNotFoundException {
+        String host = "mysql-2631b478-rofifahzain131-ttt.b.aivencloud.com";
+        String port = "22587";
+        String databaseName = "tictactoedb";
+        String dbUser = "avnadmin";
+        String dbPass = "AVNS_rAEVPQSOwl0Oo7KS89g";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", dbUser, dbPass);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT win, loss, draw FROM game_user WHERE user_name = '" + userName + "'")) {
+            if (rs.next()) {
+                wins = rs.getInt("win");
+                losses = rs.getInt("loss");
+                draws = rs.getInt("draw");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /** The entry "main" method */
     public static void main(String[] args) throws ClassNotFoundException {
         Scanner read = new Scanner(System.in);
         boolean passwordSalah = true;
+        final String[] user = new String[1];
         do{
-            System.out.println("Enter your username: ");
-            String userName = read.nextLine();
-            System.out.println("Enter your password: ");
-            String password = read.nextLine();
+            String userName = JOptionPane.showInputDialog(null, "Enter your username:", "Login", JOptionPane.PLAIN_MESSAGE);
+            String password = JOptionPane.showInputDialog(null, "Enter your password:"); // password terlihat
             String truePassword = getPassword(userName);
-            if(password.equals(truePassword)){
+            if (password != null && password.equals(truePassword)) {
                 passwordSalah = false;
-            }else{
-                System.out.println("Wrong password! please try again ");
+                user[0] = userName;
+            } else {
+                JOptionPane.showMessageDialog(null, "Wrong password! please try again");
             }
         }while(passwordSalah);
         // Run GUI construction codes in Event-Dispatching thread for thread safety
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame(TITLE);
-                // Set the content-pane of the JFrame to an instance of main JPanel
-                frame.setContentPane(new Chapter5.GameMain());
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null); // center the application window
-                frame.setVisible(true);            // show it
+                try {
+                    GameMain game = new GameMain();
+                    game.loggedInUser = user[0];
+                    game.loadUserStats(user[0]); // ambil statistik user
+                    JOptionPane.showMessageDialog(frame,
+                            "Welcome, " + user[0] + "!\n" +
+                                    "Your current stats:\n" +
+                                    "Wins: " + game.wins + "\n" +
+                                    "Losses: " + game.losses + "\n" +
+                                    "Draws: " + game.draws,
+                            "Your Stats",
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                        frame.setContentPane(game);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.pack();
+                    frame.setLocationRelativeTo(null); // center the window
+                    frame.setVisible(true);
+
+
+
             }
         });
     }
