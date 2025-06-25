@@ -38,7 +38,7 @@ public class GameMain extends JPanel {
     private int timeRemaining;
     private JLabel timerLabel; // label waktu
 
-    /** Constructor to setup the UI and game components */
+    //Constructor to setup the UI and game components
     public GameMain() {
 
         // This JPanel fires MouseEvent
@@ -196,7 +196,7 @@ public class GameMain extends JPanel {
     }
 
     private void checkAndHandleGameEnd() {
-        stopTurnTimer(); // ⛔ STOP TIMER LANGSUNG SAAT GAME END
+        stopTurnTimer(); // untuk stop timernya
         String message;
         String title = "Game Over";
 
@@ -214,7 +214,7 @@ public class GameMain extends JPanel {
             message = "O Won!";
         }
 
-        // Tampilkan 2 pilihan: Quit dan Play Again
+        // Tampilkan 2 pilihan, Quit dan Play Again
         int choice = JOptionPane.showOptionDialog(
                 this,
                 message + "\nWhat would you like to do?",
